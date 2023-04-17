@@ -6,7 +6,8 @@ const bodyParser = require("body-parser");
 const app = express();
 
 const ShopRoutes = require('./routes/shop');
-const AdminData = require('./routes/admin');
+const AdminRoutes = require('./routes/admin');
+const errorController = require('./controllers/error');
 
 
 app.use(bodyParser.urlencoded({ extended: false}));
@@ -14,13 +15,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'pug');
 app.set('views', 'views');
 app.use(ShopRoutes);
-app.use("/admin", AdminData.routes);
+app.use("/admin", AdminRoutes);
 
-
-app.use((req, res, next)=>{
-    // res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
-    res.status(404).render('404', {pageTitle: 'Page not found'});
-});
+app.use(errorController.get404);
 
 
 
