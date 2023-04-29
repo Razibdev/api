@@ -12,7 +12,7 @@ const errorController = require('./controllers/error');
 
 app.use(bodyParser.urlencoded({ extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 app.set('views', 'views');
 app.use(ShopRoutes);
 app.use("/admin", AdminRoutes);
