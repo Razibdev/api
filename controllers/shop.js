@@ -2,41 +2,40 @@ const Product = require("../models/product");
 const Cart = require('../models/cart');
 
 exports.getProducts =(req, res, next) => {
-  // console.log("In the middleware", AdminData.products);
-  // res.sendFile(path.join(rootDir, 'views', 'shop.html'));
-//   const products = AdminData.products;
-//   res.render("shop", { prods: products, pageTitle: "Shop", path: "/" });
-Product.fetchAll(productc =>{
-  res.render("shop/product-list", {
-    prods: productc,
-    pageTitle: "All Products",
-    path: "/products"
-  });
-});
+    Product.fetchAll()
+      .then(([rows, fieldData]) => {
+         res.render("shop/product-list", {
+           prods: rows,
+           pageTitle: "All Products",
+           path: "/products",
+         });
+      })
+      .catch((err) => console.log(err));
 
 };
 
 
 exports.getProduct = (req, res, next) =>{
   const prodId = req.params.productId;
-  Product.findById(prodId, product =>{
-   res.render("shop/product-detail", {
-     product: product,
-     pageTitle: product.title,
-     path: "/products",
+  Product.findById(prodId).then(([product])=>{
+      res.render("shop/product-detail", {
+      product: product[0],
+      pageTitle: product.title,
+      path: "/products",
    });
-  });
-  // res.redirect('/');
+  }).catch(err=> console.log(err));
 };
 
 exports.getIndex = (req, res, next) =>{
-  Product.fetchAll((productc) => {
+  Product.fetchAll().then(([rows, fieldData])=>{
     res.render("shop/index", {
-      prods: productc,
+      prods: rows,
       pageTitle: "Shop",
-      path: "/"
+      path: "/",
     });
-  });
+  }).catch(err=>console.log(err));
+
+   
 };
 
 exports.getCart = (req, res, next) =>{
