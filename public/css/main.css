@@ -108,3 +108,9 @@ main {
   background-color: #00695c;
   color: white;
 }
+.image{
+  height: 20rem;
+}
+.image img{
+  height: 100%;
+}
