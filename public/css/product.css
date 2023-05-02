@@ -23,3 +23,10 @@
 .product__description {
     text-align: center;
 }
+.card__image{
+    height: 213px;
+   
+}
+.card__image img{
+        height: 100%;
+    }

@@ -1,0 +1,60 @@
+<%- include('../includes/head.ejs') %>
+
+   </head>
+
+   <body>
+      <%- include('../includes/navigation.ejs') %>
+         <main>
+               <div style="width: 700px; margin: 0 auto;">
+                  <table>
+                     <thead>
+                        <tr>
+                           <th>SN</th>
+                           <th>Image</th>
+                           <th>Product Name</th>
+                           <th>Quantity</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                        <% if(products.length> 0){ %>
+                           <% products.forEach((p, i)=>{ %>
+                              <tr>
+                                 <td>
+                                    <%= i+1 %>
+                                 </td>
+                                 <td><img style="width: 100px; height: 100px;" src="<%= p.imageUrl %>" alt="alter"></td>
+                                 <td>
+                                    <%= p.title %>
+                                 </td>
+                                 <td>
+                                    <%= p.cartItem.quantity %>
+                                 </td>
+                                
+                              </tr>
+                             
+
+                              <% }) %>
+                              <tr>
+                                 <td></td>
+                                 <td></td>
+                                 <td>
+                                    <div class="centered">
+                                       <form action="/create-order" method="post">
+                                          <button type="submit" class="btn">Order Now</button>
+                                       </form>
+                                    </div>
+                                 </td>
+                                 <td></td>
+                              </tr>
+                           <% }else{ %>
+                              <tr>
+                                 <h1>No Product in Cart!!!</h1>
+
+                              </tr>
+                           <% } %>
+                     </tbody>
+                  </table>
+               </div>
+
+         </main>
+         <%- include('../includes/end.ejs') %>
