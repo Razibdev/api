@@ -12,7 +12,9 @@
                            <th>SN</th>
                            <th>Image</th>
                            <th>Product Name</th>
+                           <th>Price</th>
                            <th>Quantity</th>
+                           <th>Action</th>
                         </tr>
                      </thead>
                      <tbody>
@@ -27,7 +29,16 @@
                                     <%= p.title %>
                                  </td>
                                  <td>
-                                    <%= p.cartItem.quantity %>
+                                    <%= p.price %>
+                                 </td>
+                                 <td>
+                                    <%= p.quantity %>
+                                 </td>
+                                 <td>
+                                    <form action="/cart-delete-item" method="post">
+                                       <input type="hidden" name="productId" value="<%= p._id%>">
+                                       <button class="btn danger" type="submit">Delete</button>
+                                    </form>
                                  </td>
                                 
                               </tr>
