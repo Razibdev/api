@@ -24,19 +24,19 @@
                                  <td>
                                     <%= i+1 %>
                                  </td>
-                                 <td><img style="width: 100px; height: 100px;" src="<%= p.imageUrl %>" alt="alter"></td>
+                                 <td><img style="width: 100px; height: 100px;" src="<%= p.productId.imageUrl %>" alt="alter"></td>
                                  <td>
-                                    <%= p.title %>
+                                    <%= p.productId.title %>
                                  </td>
                                  <td>
-                                    <%= p.price %>
+                                    <%= p.productId.price %>
                                  </td>
                                  <td>
                                     <%= p.quantity %>
                                  </td>
                                  <td>
                                     <form action="/cart-delete-item" method="post">
-                                       <input type="hidden" name="productId" value="<%= p._id%>">
+                                       <input type="hidden" name="productId" value="<%= p.productId._id%>">
                                        <button class="btn danger" type="submit">Delete</button>
                                     </form>
                                  </td>
