@@ -4,13 +4,21 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
     name: {
-        type: String,
-        required: true
+        type: String
     },
     email: {
         type: String,
         required: true
     },
+    password: {
+        type: String,
+        required: true
+    },
+    resetToken:{
+      type: String
+    },
+    resetTokenExpiration: Date,
+
     cart:{
         items: [{productId:{type: Schema.Types.ObjectId, ref: 'Product'},
              quantity:{type:Number, required: true}}]

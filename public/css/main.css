@@ -116,3 +116,18 @@ main {
 .image img{
   height: 100%;
 }
+
+.user-message{
+  margin: auto;
+  width: 60%;
+  padding: 0.8rem;
+  border-radius: 3px;
+  border: 1px solid #7951e9;
+  background-color: #5925e7;
+  text-align: center;
+  color:white
+}
+.user-message--error{
+  border: 1px solid red;
+  background-color: rgb(247, 84, 84);
+}
