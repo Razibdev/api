@@ -26,3 +26,6 @@
     max-width: 90%;
     margin: auto;
 }
+.invalid{
+    border-color: red !important;
+}

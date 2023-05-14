@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const { query, validationResult } = require("express-validator");
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey('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');
 
@@ -16,9 +17,85 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    errorMessage: message
+    errorMessage: message,
+    oldInput: {
+      email: '',
+      password: '',
+    },
+    validationErrors: [],
   });
 };
+
+
+exports.postLogin = (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors.array());
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      pageTitle: "Login",
+      errorMessage: errors.array()[0].msg,
+      oldInput: {
+        email: email,
+        password: password
+      },
+      validationErrors: errors.array(),
+    });
+  }
+
+  User.findOne({ email: email }).then((user) => {
+    if (!user) {
+       return res.status(422).render("auth/login", {
+         path: "/login",
+         pageTitle: "Login",
+         errorMessage: "Invalid Email Or Password",
+         oldInput: {
+           email: email,
+           password: password,
+         },
+         validationErrors: [],
+       });
+    }
+    bcrypt
+      .compare(password, user.password)
+      .then((doMatch) => {
+        if (doMatch) {
+          req.session.isLoggedIn = true;
+          req.session.user = user;
+          res.setHeader("Content-Type", "application/json");
+          return req.session.save((err) => {
+            console.log(user);
+            res.redirect("/");
+          });
+        }
+        return res.status(422).render("auth/login", {
+          path: "/login",
+          pageTitle: "Login",
+          errorMessage: "Invalid Email Or Password",
+          oldInput: {
+            email: email,
+            password: password,
+          },
+          validationErrors: [],
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.redirect("/login");
+      });
+  });
+
+  // req.session.isLoggedIn = true;
+
+  //Expires=10/10/2023; Max-age=10;HttpOnly
+  //Secure //request send by https://
+
+  // res.redirect('/');
+};
+
 
 
 exports.getSignup = (req, res, next) => {
@@ -34,6 +111,13 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errorMessage: message,
+    oldInput: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    validationErrors: []
   });
 };
 
@@ -42,6 +126,17 @@ exports.postSignup = (req, res, next) =>{
     const email = req.body.email;
     const password = req.body.password;
     const confirmPassword = req.body.confirmPassword;
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+      console.log(errors.array());
+      return res.status(422).render('auth/signup',{
+        path: '/signup',
+        pageTitle: 'Signup',
+        errorMessage: errors.array()[0].msg,
+        oldInput: {name: username, email: email, password: password, confirmPassword: confirmPassword},
+        validationErrors: errors.array()
+      })
+    }
 
     User.findOne({email:email})
     .then(userDoc=>{
@@ -83,42 +178,7 @@ exports.postSignup = (req, res, next) =>{
 
 
 
-exports.postLogin = (req, res, next) => {
 
-  const email = req.body.email;
-  const password = req.body.password;
-
-  User.findOne({email: email}).then(user=>{
-    if(!user){
-      req.flash('error', 'Invalid Email Or Password')
-      return res.redirect('/login');
-    }
-    bcrypt.compare(password, user.password).then(doMatch=>{
-      if(doMatch){
-         req.session.isLoggedIn = true;
-         req.session.user = user;
-         res.setHeader("Content-Type", "application/json");
-        return req.session.save((err) => {
-           console.log(user);
-           res.redirect('/');
-         });
-      }
-       req.flash("error", "Invalid Email Or Password");
-      res.redirect('/login');
-    }).catch(err=>{
-      console.log(err);
-      return res.redirect('/login');
-    })
-  })
-
-
-    // req.session.isLoggedIn = true;
-    
-    //Expires=10/10/2023; Max-age=10;HttpOnly
-    //Secure //request send by https://
-
-  // res.redirect('/');
-};
 exports.postLogout = (req, res, next) => {
   // req.session.isLoggedIn = true;
   req.session.destroy((err) => {
