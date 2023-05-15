@@ -11,7 +11,6 @@ router.get("/add-product", isAuth, adminController.getAddProduct);
 router.post("/add-product",[
 
   body('title').isString().isLength({min: 3}).trim(),
-  body('imageUrl').isURL(),
   body('price').isFloat(),
   body('description').isLength({min: 8}).trim()
 
@@ -21,7 +20,6 @@ router.get("/products", isAuth, adminController.getProducts);
 router.get("/edit-product/:productId", isAuth, adminController.getEditProduct);
 router.post("/edit-product",[
   body('title').isString().isLength({min: 3}).trim(),
-  body('imageUrl').isURL(),
   body('price').isFloat(),
   body('description').isLength({min: 8}).trim()
 ], isAuth, adminController.postEditProduct);

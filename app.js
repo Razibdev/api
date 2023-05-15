@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const csrf = require("csurf");
 const flash = require('connect-flash');
+const multer = require('multer');
 
 const errorController = require("./controllers/error");
 const User = require("./models/user");
@@ -21,7 +22,9 @@ const store = new MongoDBStore({
 });
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({dest: 'images'}).single('image'));
 app.use(express.static(path.join(__dirname, "public")));
+
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -63,6 +66,12 @@ app.use(ShopRoutes);
 app.use(AuthRoutes);
 
 app.use(errorController.get404);
+app.use('/500',errorController.get500);
+
+app.use((error, req, res, next)=>{
+  // res.status(error.httpStatusCode).render('')
+  return res.redirect('/500');
+})
 
 mongoose
   .connect(MONGODB_URI)
