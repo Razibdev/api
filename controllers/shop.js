@@ -1,19 +1,41 @@
+const fs  = require('fs');
+const path = require('path');
+const PDFDocument = require('pdfkit');
+
 const Product = require("../models/product");
 // const Cart = require('../models/cart');
 const Order = require('../models/order');
 
-exports.getProducts =(req, res, next) => {
-  Product.find()
-    .then((product) => {
-        res.render("shop/product-list", {
-          prods: product,
-          pageTitle: "All Products",
-          path: "/products",
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+exports.getProducts = (req, res, next) => {
+ const page = +req.query.page || 1;
+ // const limit = req.query.limit;
+ const ITEM_PER_PAGE = 2;
+ let totalItems;
+ Product.find()
+   .countDocuments()
+   .then((numProducts) => {
+     totalItems = numProducts;
+     return Product.find()
+       .skip((page - 1) * ITEM_PER_PAGE)
+       .limit(ITEM_PER_PAGE);
+   })
+   .then((product) => {
+     res.render("shop/product-list", {
+       prods: product,
+       pageTitle: "Products",
+       path: "/products",
+       currentPage: page,
+       totalProducts: totalItems,
+       hasNextPage: ITEM_PER_PAGE * page < totalItems,
+       hasPerviousPage: page > 1,
+       nextPage: page + 1,
+       previousPage: page - 1,
+       lastPage: Math.ceil(totalItems / ITEM_PER_PAGE),
+     });
+   })
+   .catch((err) => {
+     console.log(err);
+   });
 };
 
 
@@ -31,16 +53,35 @@ exports.getProduct = (req, res, next) =>{
 };
 
 exports.getIndex = (req, res, next) =>{
-  Product.find().then(product =>{
-    res.render("shop/index", {
-      prods: product,
-      pageTitle: "Shop",
-      path: "/",
-     
+
+  const page = +req.query.page || 1;
+  // const limit = req.query.limit;
+  const ITEM_PER_PAGE = 2;
+  let totalItems;
+  Product.find()
+  .countDocuments()
+  .then(numProducts =>{
+    totalItems = numProducts;
+    return Product.find()
+      .skip((page - 1) * ITEM_PER_PAGE)
+      .limit(ITEM_PER_PAGE);
+  }).then((product) => {
+      res.render("shop/index", {
+        prods: product,
+        pageTitle: "Shop",
+        path: "/",
+        currentPage: page,
+        totalProducts: totalItems,
+        hasNextPage: ITEM_PER_PAGE * page < totalItems,
+        hasPerviousPage: page > 1,
+        nextPage: page+1,
+        previousPage: page -1,
+        lastPage: Math.ceil(totalItems / ITEM_PER_PAGE)
+      });
+    })
+    .catch((err) => {
+      console.log(err);
     });
-  }).catch(err=>{
-    console.log(err);
-  });
 
 };
 
@@ -137,6 +178,57 @@ exports.postCartDeleteProduct = (req, res, next) => {
   //   Cart.deleteProduct(prodId, product.price);
   //   res.redirect('/cart')
   // })
-
-
 };
+
+exports.getInvoice = (req, res, next) =>{
+
+  const orderId = req.params.orderId;
+  Order.findById(orderId).then(order=>{
+    if(!order){
+      return next(new Error('No order found.'));
+    }
+
+    if(order.user.userId.toString() != req.user._id.toString()){
+      return next( new Error('Unauthorized'));
+    }
+
+    console.log(orderId);
+    const invoicename = "invoice-" + orderId + ".pdf";
+    const invoicePath = path.join("data", "invoices", invoicename);
+
+    const pdfDoc = new PDFDocument();
+     res.setHeader("Content-Type", "application/pdf");
+
+     res.setHeader(
+       "Content-Disposition",
+       'inline;filename="' + invoicename + '"'
+     );
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
+    // pdfDoc.text('Hello how are you');
+    pdfDoc.fontSize(26).text('Invoice',{
+      underline: true
+    });
+    pdfDoc.end();
+
+    // fs.readFile(invoicePath, (err, data) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+    //   res.setHeader("Content-Type", "application/pdf");
+    //   // res.setHeader('Content-Disposition', 'inline; filename="'+ invoicename+ '"');
+    //   res.send(data);
+    // });
+
+    // const file = fs.createReadStream(invoicePath);
+    // res.setHeader('Content-Type', 'application/pdf');
+
+    // res.setHeader('Content-Disposition', 'inline;filename="'+invoicename+'"');
+    // file.pipe(res);
+
+  })
+  .catch(err=>{
+    next(err)
+  });
+  
+}
